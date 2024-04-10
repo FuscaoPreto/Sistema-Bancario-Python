@@ -26,7 +26,9 @@ Sair (x)
     if operacao == "s":
         if numero_de_saques < SAQUES_MAX:
             valor_sacado=float(input("Digite o valor a sacar: "))
-            if valor_sacado > saldo:
+            if valor_sacado < 0:
+                print("Só é possível sacar números positivos")
+            elif valor_sacado > saldo:
                 print("O valor sacado é superior ao saldo disponível")
             elif valor_sacado > LIMITE_SAQUE:
                 print("Valor a ser sacado excede o limite de saque")
@@ -38,8 +40,11 @@ Sair (x)
             print("Numero máximo de saques diários foi atingido (3)")
     elif operacao == "d":
         valor_deposito=float(input("Digite o valor a depositar: "))
-        saldo+=valor_deposito
-        print(f"Novo Saldo: R${saldo:.2f}")
+        if valor_deposito > 0:
+            saldo+=valor_deposito
+            print(f"Novo Saldo: R${saldo:.2f}")
+        else:
+            print("Digite um valor positivo para depositar")
     elif operacao == "e":
         print(f"Saldo: R${saldo:.2f}")
     else:
