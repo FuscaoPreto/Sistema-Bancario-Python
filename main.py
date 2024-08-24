@@ -1,103 +1,88 @@
-import time
+import time, uuid, re
 
-LIMITE_SAQUE=500
-SAQUES_MAX=3
-numero_de_saques=0
+LIMITE_SAQUE = 500
+SAQUES_MAX = 3
+AGENCIA = "0001"
+NUMERO_BANCO = "999"
 
-usuarios = {}
+usuarios = []
 
-saldo=0
+def validacao_cpf(cpf):
+    cpf = re.sub(r'[^0-9]', '', cpf)
+    if len(cpf) != 11:
+        return False
+    if cpf == cpf[0] * 11:
+        return False
+    soma = 0
+    for i in range(9):
+        soma += int(cpf[i]) * (10 - i)
+    resto = soma % 11
+    if resto < 2:
+        digito_verificador1 = 0
+    else:
+        digito_verificador1 = 11 - resto
+    if int(cpf[9]) != digito_verificador1:
+        return False
+    soma = 0
+    for i in range(10):
+        soma += int(cpf[i]) * (11 - i)
+    resto = soma % 11
+    if resto < 2:
+        digito_verificador2 = 0
+    else:
+        digito_verificador2 = 11 - resto
+    if int(cpf[10]) != digito_verificador2:
+        return False
+    return True
 
-operacao=""
-
-def saque(*,usuarios, conta_corrente):
-    saldo = usuarios[conta_corrente]["saldo"]
-    numero_de_saques = usuarios[conta_corrente]["numero_de_saques"]
+def saque(usuarios, conta_corrente):
+    if conta_corrente == None:
+        return
+    saldo = conta_corrente["saldo"]
+    numero_de_saques = conta_corrente["numero_de_saques"]
 
     if numero_de_saques < SAQUES_MAX:
         valor_sacado = float(input("Digite o valor a sacar: "))
         if valor_sacado < 0:
             print("Só é possível sacar números positivos")
+            time.sleep(1)
         elif valor_sacado > saldo:
             print("O valor sacado é superior ao saldo disponível")
+            time.sleep(1)
         elif valor_sacado > LIMITE_SAQUE:
             print("Valor a ser sacado excede o limite de saque")
+            time.sleep(1)
         else:
             saldo -= valor_sacado
             numero_de_saques += 1
-            usuarios[conta_corrente] = {"saldo": saldo, "numero_de_saques": numero_de_saques}
+            conta_corrente["saldo"] = saldo
+            conta_corrente["numero_de_saques"] = numero_de_saques
             print(f"Novo Saldo: R${saldo:.2f}")
+            time.sleep(1)
     else:
-        print("Numero máximo de saques diários foi atingido (3)")
+        print("Número máximo de saques diários foi atingido (3)")
+        time.sleep(1)
 
-def depositar(conta_corrente,usuarios):
-    
-    valor_deposito=float(input("Digite o valor a depositar: "))
+def depositar(conta_corrente, usuarios):
+    if conta_corrente == None:
+        return
+    valor_deposito = float(input("Digite o valor a depositar: "))
     if valor_deposito > 0:
-        saldo = usuarios[conta_corrente]["saldo"]
-        saldo+=valor_deposito
-        usuarios[conta_corrente] = {"saldo": saldo}
+        saldo = conta_corrente["saldo"]
+        saldo += valor_deposito
+        conta_corrente["saldo"] = saldo
         print(f"Novo Saldo: R${saldo:.2f}")
+        time.sleep(1)
     else:
         print("Digite um valor positivo para depositar")
+        time.sleep(1)
 
-def extrato(conta_corrente,usuarios):
-    saldo = usuarios[conta_corrente]["saldo"]
+def extrato(conta_corrente, usuarios):
+    if conta_corrente == None:
+        return
+    saldo = conta_corrente["saldo"]
     print(f"Saldo: R${saldo:.2f}")
-
-def validacao_cpf(cpf):
-    if len(cpf) == 11:
-        primeiro1 = int(cpf[0]) * 10
-        primeiro2 = int(cpf[1]) * 9
-        primeiro3 = int(cpf[2]) * 8
-        primeiro4 = int(cpf[3]) * 7
-        primeiro5 = int(cpf[4]) * 6
-        primeiro6 = int(cpf[5]) * 5
-        primeiro7 = int(cpf[6]) * 4
-        primeiro8 = int(cpf[7]) * 3
-        primeiro9 = int(cpf[8]) * 2
-
-        seg_primeiro1 = int(cpf[0]) * 11
-        seg_primeiro2 = int(cpf[1]) * 10
-        seg_primeiro3 = int(cpf[2]) * 9
-        seg_primeiro4 = int(cpf[3]) * 8
-        seg_primeiro5 = int(cpf[4]) * 7
-        seg_primeiro6 = int(cpf[5]) * 6
-        seg_primeiro7 = int(cpf[6]) * 5
-        seg_primeiro8 = int(cpf[7]) * 4
-        seg_primeiro9 = int(cpf[8]) * 3
-        seg_primeiro10 = int(cpf[9]) * 2
-
-        soma_validacao = (primeiro1 + primeiro2 + primeiro3 + primeiro4 + primeiro5 + primeiro6 + primeiro7 + primeiro8 + primeiro9)
-        divisao_soma = (soma_validacao // 11)
-        resto = (soma_validacao - (11 * divisao_soma))
-
-        soma_validacao_2 = (seg_primeiro1 + seg_primeiro2 + seg_primeiro3 + seg_primeiro4 + seg_primeiro5 + seg_primeiro6 + seg_primeiro7 + seg_primeiro8 + seg_primeiro9 + seg_primeiro10)
-        divisao_soma_2 = (soma_validacao_2 // 11)
-        resto_2 = (soma_validacao_2 - (11 * divisao_soma_2))
-
-        val_1 = False
-        val_2 = False
-        val_3 = False
-        val_4 = False
-
-        if(resto <=1) and (cpf[9] == 0):
-            val_1 = True
-        if( resto >=2 and resto < 10) and (11 - resto == cpf[9]):
-            val_2 = True
-        if( resto_2 <=1 ) and (cpf[10] == 0):
-            val_3 = True
-        if ( resto_2 >=2 and resto_2 < 10 ) and (11 - resto_2 == cpf[10]):
-            val_4 = True
-        else: ()
-
-        if (val_1 == True or val_2 == True) and (val_3 == True or val_4 == True):
-            return True
-        else:
-            return False
-
-    else: 
-        return False
+    time.sleep(1)
 
 def registrar_usuario(usuarios):
     cpf = input("Digite o CPF: ")
@@ -106,45 +91,90 @@ def registrar_usuario(usuarios):
             break
         else:
             print("CPF inválido, digite novamente")
-            cpf = input("Digite o CPF: ")
-    usuarios[cpf] = {"nome": nome, "logradouro": logradouro, "CPF": cpf}
+            time.sleep(1)
+            cpf = input("Digite o CPF: ")  
+    usuario = {"cpf": cpf, "contas_correntes": []}
+    usuarios.append(usuario)
     print("Usuário registrado com sucesso!")
-    
+    time.sleep(1)
+    if input("Deseja criar uma conta corrente? (s/n): ") == "s":
+        criar_conta_corrente(usuarios, cpf)
+
+def criar_conta_corrente(usuarios, cpf):
+    for usuario in usuarios:
+        if usuario["cpf"] == cpf:
+            uuid_str = str(uuid.uuid4())
+            uuid_str = uuid_str.replace('-', '')
+            uuid_int = int(uuid_str, 16)
+            uuid_9digit = str(uuid_int % 10**9)
+            uuid_9digit = NUMERO_BANCO +"-"+ uuid_9digit +"-"+ AGENCIA
+            conta_corrente = {
+                "numero_conta": uuid_9digit,
+                "saldo": 0,
+                "numero_de_saques": 0
+            }
+            usuario["contas_correntes"].append(conta_corrente)
+            print(f"Conta corrente criada com sucesso! Número da conta: {conta_corrente['numero_conta']}")
+            time.sleep(1)
+            break
+    else:
+        print("Usuário não encontrado")
+
+def selecionar_conta_corrente(usuarios):
+    cpf = input("Digite o CPF do usuário: ")
+    for usuario in usuarios:
+        if usuario["cpf"] == cpf:
+            contas = usuario["contas_correntes"]
+            if len(contas) == 0:
+                print("Usuário não possui conta corrente")
+                return None
+            for i, conta in enumerate(contas, start=1):
+                print(f"{i} - Conta: {conta['numero_conta']}, Saldo: R${conta['saldo']:.2f}")
+            opcao = int(input("Selecione o número da conta corrente: "))
+            if 1 <= opcao <= len(contas):
+                return contas[opcao - 1]
+            else:
+                print("Opção inválida")
+    else:
+        print("Usuário não encontrado")
+    return None
+
 def menu():
+    operacao = ""
     while operacao != "x":
-        global operacao
-        operacao=input(
-        '''
-        Operações disponíveis:
-                        
-        Saque (s)
-                        
-        Depósito (d)
-                        
-        Extrato (e)
-        
-        Registrar Usuário (r)
-        
-        Criar Conta Corrente (c)
-                        
-        Sair (x)
-                        
-        '''                 )
-            
+        operacao = input(
+            '''
+            Operações disponíveis:
+
+            Saque (s)
+
+            Depósito (d)
+
+            Extrato (e)
+
+            Registrar Usuário (r)
+
+            Criar Conta Corrente (c)
+
+            Sair (x)
+
+            ''')
+
         if operacao == "s":
-            saque()
+            saque(usuarios, selecionar_conta_corrente(usuarios))
         elif operacao == "d":
-            depositar()
+            depositar(selecionar_conta_corrente(usuarios), usuarios)
         elif operacao == "e":
-            extrato()
+            extrato(selecionar_conta_corrente(usuarios), usuarios)
         elif operacao == "r":
-            print("Usuário registrado com sucesso!")
+            registrar_usuario(usuarios)
         elif operacao == "c":
-            print("Conta corrente criada com sucesso!")
+            cpf = input("Digite o CPF do usuário para criar a conta corrente: ")
+            criar_conta_corrente(usuarios, cpf)
         else:
             continue
 
 menu()
 
 print("Obrigado por utilizar nossos serviços!")
-time.sleep(500)
+time.sleep(5)
