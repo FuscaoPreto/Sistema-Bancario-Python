@@ -35,7 +35,7 @@ def validacao_cpf(cpf):
         return False
     return True
 
-def saque(usuarios, conta_corrente):
+def saque(*,conta_corrente):
     if conta_corrente == None:
         return
     saldo = conta_corrente["saldo"]
@@ -63,7 +63,7 @@ def saque(usuarios, conta_corrente):
         print("Número máximo de saques diários foi atingido (3)")
         time.sleep(1)
 
-def depositar(conta_corrente, usuarios):
+def depositar(conta_corrente):
     if conta_corrente == None:
         return
     valor_deposito = float(input("Digite o valor a depositar: "))
@@ -77,30 +77,34 @@ def depositar(conta_corrente, usuarios):
         print("Digite um valor positivo para depositar")
         time.sleep(1)
 
-def extrato(conta_corrente, usuarios):
-    if conta_corrente == None:
-        return
-    saldo = conta_corrente["saldo"]
-    print(f"Saldo: R${saldo:.2f}")
-    time.sleep(1)
-
 def registrar_usuario(usuarios):
     cpf = input("Digite o CPF: ")
+    
+    for usuario in usuarios:
+        if usuario["cpf"] == cpf:
+            print("Este CPF já está registrado.")
+            time.sleep(1)
+            return
+
     while True:
         if validacao_cpf(cpf):
             break
         else:
             print("CPF inválido, digite novamente")
             time.sleep(1)
-            cpf = input("Digite o CPF: ")  
+            cpf = input("Digite o CPF: ")
+    
     usuario = {"cpf": cpf, "contas_correntes": []}
     usuarios.append(usuario)
     print("Usuário registrado com sucesso!")
     time.sleep(1)
+    
     if input("Deseja criar uma conta corrente? (s/n): ") == "s":
         criar_conta_corrente(usuarios, cpf)
 
-def criar_conta_corrente(usuarios, cpf):
+
+def criar_conta_corrente(usuarios):
+    cpf = input("Digite o CPF do usuário para criar a conta corrente: ")
     for usuario in usuarios:
         if usuario["cpf"] == cpf:
             uuid_str = str(uuid.uuid4())
@@ -161,7 +165,7 @@ def menu():
             ''')
 
         if operacao == "s":
-            saque(usuarios, selecionar_conta_corrente(usuarios))
+            saque(conta_corrente=selecionar_conta_corrente(usuarios))
         elif operacao == "d":
             depositar(selecionar_conta_corrente(usuarios), usuarios)
         elif operacao == "e":
@@ -169,8 +173,7 @@ def menu():
         elif operacao == "r":
             registrar_usuario(usuarios)
         elif operacao == "c":
-            cpf = input("Digite o CPF do usuário para criar a conta corrente: ")
-            criar_conta_corrente(usuarios, cpf)
+            criar_conta_corrente(usuarios)
         else:
             continue
 
